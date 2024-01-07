@@ -1,18 +1,16 @@
-#![allow(unused_imports)] //! Temporary
 use std::{
     io::{Result, Error, ErrorKind, Write, stdout, Stdout},
     time::Duration,
     thread::sleep,
     fs::read,
-    cmp::{min, max},
-    slice::Chunks
+    cmp::min,
 };
 use crossterm::{
     QueueableCommand,
     ExecutableCommand,
     terminal::{size, Clear, ClearType, enable_raw_mode, disable_raw_mode},
-    cursor::{self, MoveTo, SetCursorStyle},
-    style::{Print, PrintStyledContent, Stylize, Color, Attribute},
+    cursor::{MoveTo, SetCursorStyle},
+    style::{Print, PrintStyledContent, Stylize, Color},
     event::{poll, Event, KeyCode, read as read_event, KeyModifiers}
 };
 
