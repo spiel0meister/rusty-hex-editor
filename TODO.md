@@ -1,3 +1,3 @@
 # TODO
 
-[x] Implement scrolling
+- [x] Implement scrolling
