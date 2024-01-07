@@ -14,4 +14,4 @@ Cargo.lock
 *.bf
 *.b
 
-dummy.txt
+**/*.txt
