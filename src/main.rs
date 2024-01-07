@@ -24,10 +24,10 @@ impl CursorPosition {
     }
 }
 
-fn draw_bytes(out: &mut Stdout, chunks: Chunks<'_, u8>, size_of_chunks: usize, literal_part_offset: usize, cursor_pos: &CursorPosition) -> Result<()> {
+fn draw_bytes(out: &mut Stdout, chunks: &[&[u8]], size_of_chunks: usize, literal_part_offset: usize, cursor_pos: &CursorPosition) -> Result<()> {
     let highlighted_byte_row = cursor_pos.1;
     let highlighted_byte_col = (cursor_pos.0 as f32 / 3f32).floor() as usize;
-    for (row, byte_chunk) in chunks.enumerate() {
+    for (row, byte_chunk) in chunks.iter().enumerate() {
         for i in 0..size_of_chunks {
             out.queue(MoveTo(i as u16 * 3, row as u16))?;
             if size_of_chunks - byte_chunk.len() > 0 && i >= byte_chunk.len() {
@@ -71,6 +71,7 @@ fn main() -> Result<()> {
     let delay = (1000 as f32 / FPS as f32).floor() as u64;
     let bytes = read("dummy.txt")?;
     let mut cursor_position = CursorPosition(0, 0);
+    let mut start_row = 0usize;
 
     enable_raw_mode()?;
     out.execute(Clear(ClearType::All))?;
@@ -81,8 +82,14 @@ fn main() -> Result<()> {
         let (width, height) = size()?;
         let size_of_chunks = ((width - 2) / 4) as usize;
         let literal_part_offset = 3 * size_of_chunks + 2;
+        let chunks: Vec<_> = bytes.chunks(size_of_chunks).collect();
+        let input_chunks = if start_row + height as usize >= chunks.len() {
+                                         &chunks[start_row..]
+                                     } else {
+                                         &chunks[start_row..(start_row + height as usize)]
+                                     };
 
-        draw_bytes(&mut out, bytes.chunks(size_of_chunks), size_of_chunks, literal_part_offset, &cursor_position)?;
+        draw_bytes(&mut out, input_chunks, size_of_chunks, literal_part_offset, &cursor_position)?;
 
         if poll(Duration::ZERO)? {
             match read_event()? {
@@ -93,8 +100,22 @@ fn main() -> Result<()> {
                                 break;
                             }
                         },
-                        KeyCode::Char('j') => cursor_position.1 = min(cursor_position.1 + 1, height - 1),
-                        KeyCode::Char('k') => cursor_position.1 = cursor_position.1.checked_sub(1).unwrap_or(0),
+                        KeyCode::Char('j') => {
+                            if start_row != chunks.len() - height as usize - 1 && cursor_position.1 == height - 1 {
+                                start_row += 1;
+                            } else {
+                                if cursor_position.1 != height - 1 {
+                                    cursor_position.1 += 1;
+                                }    
+                            }
+                        }
+                        KeyCode::Char('k') => {
+                            if cursor_position.1 == 0 {
+                                start_row = start_row.checked_sub(1).unwrap_or(0);
+                            } else {
+                                cursor_position.1 -= 1;
+                            }
+                        }
                         KeyCode::Char('h') => cursor_position.0 = cursor_position.0.checked_sub(1).unwrap_or(0),
                         KeyCode::Char('l') => cursor_position.0 = min(cursor_position.0 + 1, width - 1),
                         _ => {}
