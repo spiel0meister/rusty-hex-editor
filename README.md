@@ -1,1 +1,3 @@
-# rust-hex-editor\n\nA hex editor, which runs in the terminal, written in Rust!
+# rust-hex-editor
+
+A hex editor, which runs in the terminal, written in Rust!

@@ -13,3 +13,5 @@ Cargo.lock
 
 *.bf
 *.b
+
+dummy.txt
