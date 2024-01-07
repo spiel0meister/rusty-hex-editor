@@ -93,7 +93,7 @@ fn main() -> Result<()> {
             match read_event()? {
                 Event::Key(event) => {
                     match event.code {
-                        KeyCode::Char('c') => {
+                        KeyCode::Char('c' | 'd') => {
                             if event.modifiers.contains(KeyModifiers::CONTROL) {
                                 break;
                             }
@@ -104,7 +104,7 @@ fn main() -> Result<()> {
                             } else {
                                 if cursor_position.1 != height - 1 {
                                     cursor_position.1 += 1;
-                                }    
+                                }
                             }
                         }
                         KeyCode::Char('k') => {
@@ -116,6 +116,12 @@ fn main() -> Result<()> {
                         }
                         KeyCode::Char('h') => cursor_position.0 = cursor_position.0.checked_sub(1).unwrap_or(0),
                         KeyCode::Char('l') => cursor_position.0 = min(cursor_position.0 + 1, width - 1),
+                        KeyCode::End => {
+                            start_row = chunks.len() - height as usize - 1;
+                        }
+                        KeyCode::Home => {
+                            start_row = 0;
+                        }
                         _ => {}
                     }
                 },
